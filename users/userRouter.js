@@ -5,9 +5,16 @@ const posts = require('../posts/postDb');
 
 const router = express.Router();
 
-router.post('/', (req, res) => {
+router.post('/', validateUser, (req, res) => {
   // do your magic!
-
+  users.insert(req.body)
+  .then(user => {
+    res.status(201).json(user)
+  })
+  .catch(error => {
+    console.log(error)
+    next(error)
+  })
 });
 
 router.post('/:id/posts', (req, res) => {
@@ -38,10 +45,29 @@ router.put('/:id', (req, res) => {
 
 function validateUserId(req, res, next) {
   // do your magic!
+  if (req.params.id) {
+    req.user = req.params.id;
+    next();
+  } else {
+    res.status(400).json({
+      message: "Invalid user id"
+    })
+  }
 }
 
 function validateUser(req, res, next) {
   // do your magic!
+  if (req.body && req.body.name) {
+    next()
+  } else if (req.body && !req.body.name) {
+    res.status(400).json({
+      message: "Missing required field name"
+    })
+  } else {
+    res.status(400).json({
+      message: "missing user data"
+    })
+  }
 }
 
 function validatePost(req, res, next) {

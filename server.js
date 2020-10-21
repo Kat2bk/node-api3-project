@@ -37,11 +37,13 @@ server.get('/', (req, res) => {
   res.send(`<h2>Let's write some middleware!</h2>`);
 });
 
-server.use(function(err, req, res, next) {
-  console.error(err.stack)
-  res.status(500).send('Sorry, something broke, try again later')
+server.use((err, req, res, next) => {
+  console.log(err);
+  res.status(500).json({
+      message: 'There was an error performing the required operation',
+      error: err
+  })
 })
-
 //custom middleware
 // remember to include next()
 
