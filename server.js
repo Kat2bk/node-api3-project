@@ -4,6 +4,7 @@ const helmet = require('helmet')
 
 const userRouter = require('./users/userRouter');
 const postsRouter = require('./posts/postRouter');
+const e = require('express');
 
 const server = express();
 
@@ -17,13 +18,21 @@ const server = express();
 // set up a welcome route with server.get('/')
 // export any middleware, routers, functions
 // set up logger
+// validating user requires checking the id via the req
+// valiadating post requires checking the req.body
+// error middleware
 
 server.use(express.json());
 server.use(helmet());
 // server.use(cors());
 server.use(logger);
+server.use(function(err, req, res, next) {
+  console.error(err.stack)
+  res.status(500).send('Sorry, something broke, try again later')
+})
 
 // server.use() for route for /api/users
+server.use('/api/users', userRouter)
 // server.use() for route for /api/posts
 
 server.get('/', (req, res) => {
@@ -36,7 +45,46 @@ server.get('/', (req, res) => {
 function logger(req, res, next) {
   const requestTime = new Date();
   console.log(`${req.method} request to ${req.path} at ${requestTime.toISOString().slice(0, 10)}`)
-  next()
+  next();
+}
+
+function validateUserId(req, res, next) {
+  if (req.id) {
+    req.user = req.id;
+    next();
+  } else {
+    res.status(400).json({
+      error: res.message
+    })
+  }
+}
+
+function validateUser(req, res, next) {
+  if (req.body) {
+    next();
+  } else if (req.body && !req.body.name) {
+    res.status(400).json({
+      error: "missing required name field"
+    })
+  } else {
+    res.status(400).json({
+      error: "missing user data"
+    })
+  }
+}
+
+function validatePost(req, res, next) {
+  if (req.body) {
+    next();
+  } else if (req.body && !req.body.text) {
+    res.status(400).json({
+      error: "missing required text field"
+    })
+  } else {
+    res.status(400).json({
+      error: "missing post data"
+    })
+  }
 }
 
 module.exports = server;
