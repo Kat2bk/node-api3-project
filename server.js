@@ -2,9 +2,11 @@ const express = require('express');
 const helmet = require('helmet')
 // put cors here
 
+const logger = require('./middleware/logger');
+const {validateUserId, validatePost} = require('./middleware/validateFunctions');
+
 const userRouter = require('./users/userRouter');
 const postsRouter = require('./posts/postRouter');
-const e = require('express');
 
 const server = express();
 
@@ -24,12 +26,8 @@ const server = express();
 
 server.use(express.json());
 server.use(helmet());
-// server.use(cors());
-server.use(logger);
-server.use(function(err, req, res, next) {
-  console.error(err.stack)
-  res.status(500).send('Sorry, something broke, try again later')
-})
+// // server.use(cors());
+server.use(logger());
 
 // server.use() for route for /api/users
 server.use('/api/users', userRouter)
@@ -39,52 +37,12 @@ server.get('/', (req, res) => {
   res.send(`<h2>Let's write some middleware!</h2>`);
 });
 
+server.use(function(err, req, res, next) {
+  console.error(err.stack)
+  res.status(500).send('Sorry, something broke, try again later')
+})
+
 //custom middleware
 // remember to include next()
-
-function logger(req, res, next) {
-  const requestTime = new Date();
-  console.log(`${req.method} request to ${req.path} at ${requestTime.toISOString().slice(0, 10)}`)
-  next();
-}
-
-function validateUserId(req, res, next) {
-  if (req.id) {
-    req.user = req.id;
-    next();
-  } else {
-    res.status(400).json({
-      error: res.message
-    })
-  }
-}
-
-function validateUser(req, res, next) {
-  if (req.body) {
-    next();
-  } else if (req.body && !req.body.name) {
-    res.status(400).json({
-      error: "missing required name field"
-    })
-  } else {
-    res.status(400).json({
-      error: "missing user data"
-    })
-  }
-}
-
-function validatePost(req, res, next) {
-  if (req.body) {
-    next();
-  } else if (req.body && !req.body.text) {
-    res.status(400).json({
-      error: "missing required text field"
-    })
-  } else {
-    res.status(400).json({
-      error: "missing post data"
-    })
-  }
-}
 
 module.exports = server;

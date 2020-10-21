@@ -1,9 +1,13 @@
 const express = require('express');
 
+const users = require('./userDb');
+const posts = require('../posts/postDb');
+
 const router = express.Router();
 
 router.post('/', (req, res) => {
   // do your magic!
+
 });
 
 router.post('/:id/posts', (req, res) => {
