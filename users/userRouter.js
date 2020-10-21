@@ -5,11 +5,11 @@ const posts = require('../posts/postDb');
 
 const router = express.Router();
 
-router.post('/', validateUser, (req, res) => {
+router.post('/', validateUser, async (req, res) => {
   // do your magic!
   users.insert(req.body)
   .then(user => {
-    res.status(201).json(user)
+   return res.status(201).json(user)
   })
   .catch(error => {
     console.log(error)
@@ -26,7 +26,7 @@ router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
 
 posts.insert(postInfo)
   .then(post => {
-    res.status(201).json(post)
+  return res.status(201).json(post)
   })
   .catch(error => {
     next(error)
@@ -37,7 +37,7 @@ router.get('/', (req, res) => {
   // do your magic!
   users.get()
   .then(users => {
-    res.status(200).json(users)
+   return res.status(200).json(users)
   })
   .catch(error => {
     next(error)
@@ -49,7 +49,7 @@ router.get('/:id', validateUserId, (req, res) => {
   // do your magic!
   users.getById(id)
   .then(user => {
-    res.status(200).json(user)
+    return res.status(200).json(user)
   })
   .catch(error => {
     next(error)
@@ -61,19 +61,33 @@ router.get('/:id/posts', (req, res) => {
   const {id} = req.params;
   users.getUserPosts(id)
   .then(posts => {
-    res.status(200).json(posts)
+   return res.status(200).json(posts)
   })
   .catch(error => {
     next(error)
   })
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
   // do your magic!
+  users.remove(req.params.id)
+  .then(user => {
+    return res.status(200).json(user)
+  })
+  .catch(error => {
+    next(error)
+  })
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateUser, (req, res) => {
   // do your magic!
+  users.update(req.params.id, req.body)
+  .then(username => {
+  return res.status(200).json(username)
+  })
+  .catch(error => {
+    next(error)
+  })
 });
 
 //custom middleware
